@@ -1,0 +1,36 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+  config.vm.network "forwarded_port", guest: 8020, host: 8020
+  config.vm.network "forwarded_port", guest: 9001, host: 9001
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  config.vm.network "private_network", ip: "192.168.33.10"
+
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false
+
+    # Customize the amount of memory on the VM:
+    vb.memory = "1024"
+  end
+
+  # Initial run script
+  config.vm.provision "shell", inline: <<-SHELL
+    echo Updating apt repository…
+    sudo apt-get update -y > /dev/null
+    echo Installing OpenJDK 7…
+    sudo apt-get install -y openjdk-7-jdk > /dev/null
+    echo Downloading Hadoop distribution…
+    wget -q http://mirrors.rackhosting.com/apache/hadoop/common/hadoop-2.7.1/hadoop-2.7.1.tar.gz 
+    tar -zxf hadoop-2.7.1.tar.gz
+    chown -R vagrant hadoop-2.7.1 
+    echo Overwriting hadoop-env.sh…
+    cat /vagrant/hadoop_conf/hadoop-env.sh > hadoop-2.7.1/etc/hadoop/hadoop-env.sh
+  SHELL
+end
