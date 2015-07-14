@@ -20,33 +20,39 @@ Vagrant.configure(2) do |config|
     vb.memory = "1024"
   end
 
-  # Initial run script
-  config.vm.provision "shell", inline: <<-SHELL
-    echo Updating apt repository…
-    sudo apt-get update -y > /dev/null
-    echo Installing OpenJDK 7…
-    sudo apt-get install -y openjdk-7-jdk > /dev/null
-    echo Downloading Hadoop distribution…
+  # Initial run script, executed with root privileges
+  config.vm.provision "shell", privileged: true, inline: <<-SHELL
+    echo Updating apt repository
+    apt-get update -y > /dev/null
+    echo Installing OpenJDK 7
+    apt-get install -y openjdk-7-jdk > /dev/null
+  SHELL
+  
+  # Initial run script, executed as the user
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    echo Downloading Hadoop distribution
     wget -q http://mirrors.rackhosting.com/apache/hadoop/common/hadoop-2.7.1/hadoop-2.7.1.tar.gz 
+	#echo Copying Hadoop distribution
+	#cp /vagrant/hadoop-2.7.1.tar.gz ~
     tar -zxf hadoop-2.7.1.tar.gz
     chown -R vagrant hadoop-2.7.1 
-    echo Overwriting hadoop-env.sh…
+    echo Overwriting hadoop-env.sh
     cat /vagrant/hadoop_conf/hadoop-env.sh > hadoop-2.7.1/etc/hadoop/hadoop-env.sh
-    echo Overwriting core-site.xml…
+    echo Overwriting core-site.xml
     cat /vagrant/hadoop_conf/core-site.xml > hadoop-2.7.1/etc/hadoop/core-site.xml
-    echo Overwriting hdfs-site.xml…
+    echo Overwriting hdfs-site.xml
     cat /vagrant/hadoop_conf/hdfs-site.xml > hadoop-2.7.1/etc/hadoop/hdfs-site.xml
-    echo Setting up passwordless ssh…
+    echo Setting up passwordless ssh
     ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
     echo StrictHostKeyChecking no >> ~/.ssh/config
-    echo Formatting namenode…
+    echo Formatting namenode
     hadoop-2.7.1/bin/hdfs namenode -format
   SHELL
 
   # Run always
-  config.vm.provision "shell", run: "always", inline: <<-SHELL
-    echo Starting DFS…
+  config.vm.provision "shell", privileged: false, run: "always", inline: <<-SHELL
+    echo Starting DFS
     hadoop-2.7.1/sbin/start-dfs.sh
   SHELL
 end
