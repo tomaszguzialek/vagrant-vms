@@ -1,0 +1,74 @@
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+
+  config.vm.network "forwarded_port", guest: 8032, host: 8032
+  config.vm.network "forwarded_port", guest: 8088, host: 8088
+  config.vm.network "forwarded_port", guest: 9000, host: 9000
+  config.vm.network "forwarded_port", guest: 50070, host: 50070
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  config.vm.network "private_network", ip: "192.168.33.10"
+  
+  config.vm.hostname = "hadoop-psuedo-yarn"
+
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false
+	
+	# Set the VirtualBox VM name equal to the hostname
+	vb.name = config.vm.hostname.to_s
+
+    # Customize the amount of memory on the VM:
+    vb.memory = "1024"
+  end
+
+  # Initial run script, executed with root privileges
+  config.vm.provision "shell", privileged: true, inline: <<-SHELL
+    echo Updating apt repository
+    apt-get update -y > /dev/null
+    echo Installing OpenJDK 7
+    apt-get install -y openjdk-7-jdk > /dev/null
+  SHELL
+  
+  # Initial run script, executed as the vagrant user
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    # echo Downloading Hadoop distribution
+    # wget -q http://mirrors.rackhosting.com/apache/hadoop/common/hadoop-2.7.1/hadoop-2.7.1.tar.gz 
+	echo Copying Hadoop distribution from the host
+	cp /vagrant/hadoop-2.7.1.tar.gz ~
+    tar -zxf hadoop-2.7.1.tar.gz
+    chown -R vagrant hadoop-2.7.1 
+    echo Overwriting hadoop-env.sh
+    cat /vagrant/hadoop_conf/hadoop-env.sh > hadoop-2.7.1/etc/hadoop/hadoop-env.sh
+    echo Overwriting core-site.xml
+    cat /vagrant/hadoop_conf/core-site.xml > hadoop-2.7.1/etc/hadoop/core-site.xml
+    echo Overwriting hdfs-site.xml
+    cat /vagrant/hadoop_conf/hdfs-site.xml > hadoop-2.7.1/etc/hadoop/hdfs-site.xml
+	echo Overwriting mapred-site.xml
+    cat /vagrant/hadoop_conf/mapred-site.xml > hadoop-2.7.1/etc/hadoop/mapred-site.xml
+	echo Overwriting yarn-site.xml
+    cat /vagrant/hadoop_conf/yarn-site.xml > hadoop-2.7.1/etc/hadoop/yarn-site.xml
+    echo Setting up passwordless ssh
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+    echo StrictHostKeyChecking no >> ~/.ssh/config
+    echo Formatting namenode
+    hadoop-2.7.1/bin/hdfs namenode -format
+	echo Creating /user/vagrant in HDFS
+	hadoop-2.7.1/bin/hdfs dfs -mkdir /user
+	hadoop-2.7.1/bin/hdfs dfs -mkdir /user/vagrant
+  SHELL
+
+  # Run always
+  config.vm.provision "shell", privileged: false, run: "always", inline: <<-SHELL
+    echo Starting DFS
+    hadoop-2.7.1/sbin/start-dfs.sh
+	echo Starting YARN
+	hadoop-2.7.1/sbin/start-yarn.sh
+  SHELL
+end
