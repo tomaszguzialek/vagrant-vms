@@ -7,6 +7,7 @@ In order to run virtual machines from this project, VirtualBox and Vagrant are n
 # Vagrant plugins
 Plugin vagrant-triggers is required. Pure Vagrant does not have a tear down hook to run a script before shutting down, reloading or destroying a VM.
 
+In order to install the plugin:
 ```
 vagrant plugin install vagrant-triggers
 ```
