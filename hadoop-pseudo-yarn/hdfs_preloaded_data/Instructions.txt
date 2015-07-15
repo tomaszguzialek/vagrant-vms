@@ -1,0 +1,3 @@
+All contents of hdfs_preloaded_data will be put into HDFS during provisioning of the VM.
+Destination in HDFS: /user/vagrant
+Full path to HDFS: hdfs://hadoop-pseudo-yarn:9000/user/vagrant or hdfs://localhost:9000/user/vagrant with port forwarding.
