@@ -1,0 +1,127 @@
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+
+  # HDFS direct interaction
+  config.vm.network "forwarded_port", guest: 8020, host: 8020
+  # HDFS direct interaction
+  config.vm.network "forwarded_port", guest: 9000, host: 9000
+  # HDFS namenode web interface
+  config.vm.network "forwarded_port", guest: 50070, host: 50070
+  # HDFS secondary namenode web interface
+  config.vm.network "forwarded_port", guest: 50090, host: 50090
+  # HDFS datanode web interface
+  config.vm.network "forwarded_port", guest: 50075, host: 50075
+  # HDFS data transfer
+  config.vm.network "forwarded_port", guest: 50010, host: 50010
+  
+  # YARN resource manager (application submission)
+  config.vm.network "forwarded_port", guest: 8032, host: 8032
+  # YARN resource manager web interface
+  config.vm.network "forwarded_port", guest: 8088, host: 8088
+  # YARN node manager web interface
+  config.vm.network "forwarded_port", guest: 50060, host: 50060
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  config.vm.network "private_network", ip: "192.168.33.10"
+  
+  config.vm.hostname = "bigdatavm"
+
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false
+	
+	# Set the VirtualBox VM name equal to the hostname
+	vb.name = config.vm.hostname.to_s
+
+    # Customize the amount of memory on the VM:
+    vb.memory = "4096"
+  end
+
+  # Initial run script, executed with root privileges
+  config.vm.provision "shell", privileged: true, inline: <<-SHELL
+    echo Updating apt repository
+    apt-get update -y
+    echo Installing OpenJDK 7
+    apt-get install -y openjdk-7-jdk
+	echo Exporting JAVA_HOME
+	export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre
+  SHELL
+  
+  # Initial run script, executed as the vagrant user
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    # echo Downloading Hadoop distribution
+    # wget -q http://mirrors.rackhosting.com/apache/hadoop/common/hadoop-2.7.1/hadoop-2.7.1.tar.gz 
+	echo Copying Hadoop distribution from the host
+	cp /vagrant/hadoop-2.7.1.tar.gz ~
+    tar -zxf hadoop-2.7.1.tar.gz
+    chown -R vagrant hadoop-2.7.1 
+	# echo Downloading HBase distribution
+	# wget -q http://mirrors.rackhosting.com/apache/hbase/1.1.1/hbase-1.1.1-bin.tar.gz
+	echo Copying HBase distribution from the host
+	cp /vagrant/hbase-1.1.1-bin.tar.gz ~
+    tar -zxf hbase-1.1.1-bin.tar.gz
+    chown -R vagrant hbase-1.1.1-bin 
+    echo Overwriting hadoop-env.sh
+    cat /vagrant/hadoop_conf/hadoop-env.sh > hadoop-2.7.1/etc/hadoop/hadoop-env.sh
+    echo Overwriting core-site.xml
+    cat /vagrant/hadoop_conf/core-site.xml > hadoop-2.7.1/etc/hadoop/core-site.xml
+    echo Overwriting hdfs-site.xml
+    cat /vagrant/hadoop_conf/hdfs-site.xml > hadoop-2.7.1/etc/hadoop/hdfs-site.xml
+	echo Overwriting mapred-site.xml
+    cat /vagrant/hadoop_conf/mapred-site.xml > hadoop-2.7.1/etc/hadoop/mapred-site.xml
+	echo Overwriting yarn-site.xml
+    cat /vagrant/hadoop_conf/yarn-site.xml > hadoop-2.7.1/etc/hadoop/yarn-site.xml
+	echo Overwriting hbase-env.sh
+    cat /vagrant/hbase_conf/hbase-env.sh > hbase-1.1.1-bin/conf/hbase-env.sh
+	echo Overwriting hbase-site.xml
+    cat /vagrant/hbase_conf/hbase-site.xml > hbase-1.1.1-bin/conf/hbase-site.xml
+    echo Setting up passwordless ssh
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+    echo StrictHostKeyChecking no >> ~/.ssh/config
+    echo Formatting namenode
+    hadoop-2.7.1/bin/hdfs namenode -format
+  SHELL
+
+  # Run always
+  config.vm.provision "shell", privileged: false, run: "always", inline: <<-SHELL
+    echo Starting DFS
+    hadoop-2.7.1/sbin/start-dfs.sh
+	echo Starting HBase
+    hbase-1.1.1-bin/bin/start-hbase.sh
+	echo Starting YARN
+	hadoop-2.7.1/sbin/start-yarn.sh
+  SHELL
+  
+  # Initial run script, executed as the vagrant user. Needs to run after starting HDFS.
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    echo Creating /user/vagrant directory in HDFS
+	hadoop-2.7.1/bin/hdfs dfs -mkdir /user
+	hadoop-2.7.1/bin/hdfs dfs -mkdir /user/vagrant
+	echo Loading hdfs_preloaded_data contents into /user/vagrant
+	hadoop-2.7.1/bin/hdfs dfs -put /vagrant/hdfs_preloaded_data/* /user/vagrant
+  SHELL
+  
+  # Using vagrant-triggers plugin to stop YARN and HDFS on halt and reload commands
+  config.trigger.before :halt do
+	info "Stopping YARN"
+	run "vagrant ssh -c 'hadoop-2.7.1/sbin/stop-yarn.sh'"
+	info "Stopping HBase"
+	run "vagrant ssh -c 'hbase-1.1.1-bin/bin/stop-hbase.sh'"
+	info "Stopping DFS"
+	run "vagrant ssh -c 'hadoop-2.7.1/sbin/stop-dfs.sh'"
+  end
+  config.trigger.before :reload do
+	info "Stopping YARN"
+	run "vagrant ssh -c 'hadoop-2.7.1/sbin/stop-yarn.sh'"
+	info "Stopping HBase"
+	run "vagrant ssh -c 'hbase-1.1.1-bin/bin/stop-hbase.sh'"
+	info "Stopping DFS"
+	run "vagrant ssh -c 'hadoop-2.7.1/sbin/stop-dfs.sh'"
+  end
+end
