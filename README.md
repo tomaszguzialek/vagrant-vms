@@ -25,3 +25,22 @@ In order to install the plugin:
 ```
 vagrant plugin install vagrant-vbox-snapshot
 ```
+
+# Usage
+In the command line navigate to the directory where Vagrantfile is saved. In order to start the VM:
+```
+vagrant up
+```
+In order to connect to the VM:
+```
+vagrant ssh
+```
+When finished with working in the VM:
+```
+vagrant halt
+```
+If the VM got broken during testing, destroy it and start from scratch:
+```
+vagrant destroy
+vagrant up
+```
