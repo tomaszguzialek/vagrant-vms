@@ -52,10 +52,16 @@ Vagrant.configure(2) do |config|
   
   # Initial run script, executed as the vagrant user
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
-    # echo Downloading Hadoop distribution
-    # wget -q http://mirrors.rackhosting.com/apache/hadoop/common/hadoop-2.7.1/hadoop-2.7.1.tar.gz 
+    if [ -e /vagrant/download_cache/hadoop-2.7.1.tar.gz ];
+    then 
 	echo Copying Hadoop distribution from the host
-	cp /vagrant/hadoop-2.7.1.tar.gz ~
+	cp /vagrant/download_cache/hadoop-2.7.1.tar.gz ~
+    else
+        echo Downloading Hadoop distribution
+        wget -q http://mirrors.rackhosting.com/apache/hadoop/common/hadoop-2.7.1/hadoop-2.7.1.tar.gz
+        echo Caching Hadoop distribution at the host
+        rsync -a hadoop-2.7.1.tar.gz /vagrant/download_cache/
+    fi
     tar -zxf hadoop-2.7.1.tar.gz
     chown -R vagrant hadoop-2.7.1 
     echo Overwriting hadoop-env.sh
