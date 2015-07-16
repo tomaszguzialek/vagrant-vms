@@ -23,11 +23,19 @@
 
 <configuration>
   <property>
-    <name>hbase.rootdir</name>
-    <value>file:///home/vagrant/hbase</value>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
   </property>
   <property>
-    <name>hbase.zookeeper.property.dataDir</name>
-    <value>/home/vagrant/zookeeper</value>
+    <name>hbase.master</name>
+    <value>bigdatavm:16000</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>bigdatavm</value>
+  </property>
+  <property>
+    <name>hbase.rootdir</name>
+    <value>hdfs://bigdatavm:9000/hbase</value>
   </property>
 </configuration>
