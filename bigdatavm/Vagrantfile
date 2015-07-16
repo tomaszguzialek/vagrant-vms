@@ -5,7 +5,7 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
 
-  # HDFS direct interaction / ZooKeeper
+  # HDFS direct interaction
   config.vm.network "forwarded_port", guest: 8020, host: 8020
   # HDFS direct interaction
   config.vm.network "forwarded_port", guest: 9000, host: 9000
@@ -22,6 +22,12 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 16010, host: 16010
   # HBase region server web interface
   config.vm.network "forwarded_port", guest: 16030, host: 16030
+  # HBase master
+  config.vm.network "forwarded_port", guest: 16000, host: 16000
+  # HBase region server
+  config.vm.network "forwarded_port", guest: 16020, host: 16020
+  # ZooKeeper connection port
+  config.vm.network "forwarded_port", guest: 2181, host: 2181
   
   # YARN resource manager (application submission)
   config.vm.network "forwarded_port", guest: 8032, host: 8032
@@ -120,6 +126,8 @@ Vagrant.configure(2) do |config|
 	hadoop-2.7.1/bin/hdfs dfs -mkdir /user/vagrant
 	echo Loading hdfs_preloaded_data contents into /user/vagrant
 	hadoop-2.7.1/bin/hdfs dfs -put /vagrant/hdfs_preloaded_data/* /user/vagrant
+	echo Loading HBase with hbase_preloaded_data scripts
+	cat /vagrant/hbase_preloaded_data/* | hbase-1.1.1/bin/hbase shell
   SHELL
   
   # Using vagrant-triggers plugin to stop YARN and HDFS on halt and reload commands
