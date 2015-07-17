@@ -55,6 +55,8 @@ Vagrant.configure(2) do |config|
 
   # Initial run script, executed with root privileges
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
+    echo Overwriting /etc/hosts
+    cp /vagrant/hbase_conf/etc-hosts.txt /etc/hosts
     echo Updating apt repository
     apt-get update -y
     echo Installing OpenJDK 7
