@@ -1,3 +1,5 @@
 .DS_Store
 .vagrant
+download_cache
 *.tar.gz
+*.tgz
