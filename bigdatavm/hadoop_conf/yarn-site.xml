@@ -4,6 +4,14 @@
         <value>mapreduce_shuffle</value>
     </property>
 	<property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>bigdatavm</value>
+    </property>
+	<property>
+        <name>yarn.nodemanager.hostname</name>
+        <value>bigdatavm</value>
+    </property>
+	<property>
         <name>yarn.resourcemanager.bind-host</name>
         <value>0.0.0.0</value>
     </property>
