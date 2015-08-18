@@ -145,6 +145,7 @@ Vagrant.configure(2) do |config|
 	oozie-4.2.0/bin/mkdistro.sh -Puber -Phadoop-2 -DskipTests
 	mkdir /home/vagrant/oozie-4.2.0-distro
 	tar -zxf oozie-4.2.0/distro/target/oozie-4.2.0-distro.tar.gz -C /home/vagrant/oozie-4.2.0-distro
+	/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/oozie-setup.sh prepare-war
   SHELL
 
   # Run always
@@ -155,6 +156,8 @@ Vagrant.configure(2) do |config|
     hbase-1.1.1/bin/start-hbase.sh
 	echo Starting YARN
 	hadoop-2.7.1/sbin/start-yarn.sh
+	echo Starting Oozie
+	oozie-4.2.0-distro/oozie-4.2.0/bin/oozied.sh start
   SHELL
   
   # Initial run script, executed as the vagrant user. Needs to run after starting HDFS.
