@@ -61,6 +61,8 @@ Vagrant.configure(2) do |config|
     apt-get update -y
     echo Installing OpenJDK 7
     apt-get install -y openjdk-7-jdk
+	echo Installing "zip" and "unzip"
+	apt-get install -y zip unzip
 	echo Adding Maven to PATH environmental variable
 	export PATH=$PATH:/home/vagrant/apache-maven-3.3.3/bin
 	echo PATH=\"$PATH\" > /etc/environment
@@ -130,12 +132,19 @@ Vagrant.configure(2) do |config|
     cat /vagrant/hbase_conf/hbase-env.sh > hbase-1.1.1/conf/hbase-env.sh
 	echo Overwriting hbase-site.xml
     cat /vagrant/hbase_conf/hbase-site.xml > hbase-1.1.1/conf/hbase-site.xml
+	echo Overwriting Oozie POM file
+	cat /vagrant/oozie_conf/pom.xml > oozie-4.2.0/pom.xml
     echo Setting up passwordless ssh
     ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
     echo StrictHostKeyChecking no >> ~/.ssh/config
     echo Formatting namenode
     hadoop-2.7.1/bin/hdfs namenode -format
+	echo Building Oozie
+	export PATH=$PATH:/home/vagrant/apache-maven-3.3.3/bin
+	oozie-4.2.0/bin/mkdistro.sh -Puber -Phadoop-2 -DskipTests
+	mkdir /home/vagrant/oozie-4.2.0-distro
+	tar -zxf oozie-4.2.0/distro/target/oozie-4.2.0-distro.tar.gz -C /home/vagrant/oozie-4.2.0-distro
   SHELL
 
   # Run always
