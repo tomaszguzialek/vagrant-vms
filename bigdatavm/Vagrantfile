@@ -61,6 +61,9 @@ Vagrant.configure(2) do |config|
     apt-get update -y
     echo Installing OpenJDK 7
     apt-get install -y openjdk-7-jdk
+	echo Adding Maven to PATH environmental variable
+	export PATH=$PATH:/home/vagrant/apache-maven-3.3.3/bin
+	echo PATH=\"$PATH\" > /etc/environment
   SHELL
   
   # Initial run script, executed as the vagrant user
@@ -89,6 +92,30 @@ Vagrant.configure(2) do |config|
     fi	
 	tar -zxf hbase-1.1.1-bin.tar.gz
     chown -R vagrant hbase-1.1.1
+	if [ -e /vagrant/download_cache/apache-maven-3.3.3-bin.tar.gz ];
+    then 
+		echo Copying Maven distribution from the host
+		cp /vagrant/download_cache/apache-maven-3.3.3-bin.tar.gz ~
+    else
+        echo Downloading Maven distribution
+        wget -q http://mirrors.rackhosting.com/apache/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.tar.gz
+        echo Caching Maven distribution at the host
+        rsync -a apache-maven-3.3.3-bin.tar.gz /vagrant/download_cache/
+    fi
+    tar -zxf apache-maven-3.3.3-bin.tar.gz
+    chown -R vagrant apache-maven-3.3.3
+	if [ -e /vagrant/download_cache/oozie-4.2.0.tar.gz ];
+    then 
+		echo Copying Oozie distribution from the host
+		cp /vagrant/download_cache/oozie-4.2.0.tar.gz ~
+    else
+        echo Downloading Oozie distribution
+        wget -q http://mirrors.rackhosting.com/apache/oozie/4.2.0/oozie-4.2.0.tar.gz
+        echo Caching Oozie distribution at the host
+        rsync -a oozie-4.2.0.tar.gz /vagrant/download_cache/
+    fi
+    tar -zxf oozie-4.2.0.tar.gz
+    chown -R vagrant oozie-4.2.0
     echo Overwriting hadoop-env.sh
     cat /vagrant/hadoop_conf/hadoop-env.sh > hadoop-2.7.1/etc/hadoop/hadoop-env.sh
     echo Overwriting core-site.xml
