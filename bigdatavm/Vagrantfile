@@ -183,6 +183,8 @@ Vagrant.configure(2) do |config|
 	hadoop-2.7.1/bin/hdfs dfs -put /vagrant/hdfs_preloaded_data/* /user/vagrant
 	echo Loading HBase with hbase_preloaded_data scripts
 	cat /vagrant/hbase_preloaded_data/* | hbase-1.1.1/bin/hbase shell
+	echo Uploading Oozie sharelibs to HDFS
+	/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/oozie-setup.sh sharelib create -fs hdfs://bigdatavm:9000
   SHELL
   
   # Using vagrant-triggers plugin to stop YARN and HDFS on halt and reload commands
