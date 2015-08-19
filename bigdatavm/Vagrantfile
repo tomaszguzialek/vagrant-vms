@@ -65,6 +65,7 @@ Vagrant.configure(2) do |config|
 	apt-get install -y zip unzip
 	echo Adding Maven to PATH environmental variable
 	export PATH=$PATH:/home/vagrant/apache-maven-3.3.3/bin
+	export PATH=$PATH:/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/
 	echo PATH=\"$PATH\" > /etc/environment
   SHELL
   
@@ -118,6 +119,16 @@ Vagrant.configure(2) do |config|
     fi
     tar -zxf oozie-4.2.0.tar.gz
     chown -R vagrant oozie-4.2.0
+	if [ -e /vagrant/download_cache/ext-2.2.zip ];
+    then 
+		echo Copying ExtJS 2.2 distribution from the host
+		cp /vagrant/download_cache/ext-2.2.zip ~
+    else
+        echo Downloading ExtJS 2.2 distribution
+        wget -q http://dev.sencha.com/deploy/ext-2.2.zip
+        echo Caching ExtJS 2.2 distribution at the host
+        rsync -a ext-2.2.zip /vagrant/download_cache/
+    fi
     echo Overwriting hadoop-env.sh
     cat /vagrant/hadoop_conf/hadoop-env.sh > hadoop-2.7.1/etc/hadoop/hadoop-env.sh
     echo Overwriting core-site.xml
@@ -145,6 +156,9 @@ Vagrant.configure(2) do |config|
 	oozie-4.2.0/bin/mkdistro.sh -Puber -Phadoop-2 -DskipTests
 	mkdir /home/vagrant/oozie-4.2.0-distro
 	tar -zxf oozie-4.2.0/distro/target/oozie-4.2.0-distro.tar.gz -C /home/vagrant/oozie-4.2.0-distro
+	echo Configuring Oozie
+	mkdir /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/libext
+	cp /home/vagrant/ext-2.2.zip /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/libext
 	/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/oozie-setup.sh prepare-war
   SHELL
 
