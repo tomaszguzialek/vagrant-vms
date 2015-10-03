@@ -83,7 +83,7 @@ Vagrant.configure(2) do |config|
 	cp /vagrant/download_cache/hbase-1.1.1-bin.tar.gz ~
     else
         echo Downloading HBase distribution
-        wget -q http://mirrors.rackhosting.com/apache/hbase/1.1.1/hbase-1.1.1-bin.tar.gz
+        wget -q http://archive.apache.org/dist/hbase/1.1.1/hbase-1.1.1-bin.tar.gz
         echo Caching HBase distribution at the host
         rsync -a hbase-1.1.1-bin.tar.gz /vagrant/download_cache/
     fi	
