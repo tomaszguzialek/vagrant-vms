@@ -167,7 +167,6 @@ Vagrant.configure(2) do |config|
 	echo Configuring Oozie
 	mkdir /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/libext
 	cp /home/vagrant/ext-2.2.zip /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/libext
-	/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/oozie-setup.sh prepare-war
   SHELL
 
   # Run always
@@ -178,8 +177,6 @@ Vagrant.configure(2) do |config|
     hbase-1.1.1/bin/start-hbase.sh
 	echo Starting YARN
 	hadoop-2.7.1/sbin/start-yarn.sh
-	echo Starting Oozie
-	oozie-4.2.0-distro/oozie-4.2.0/bin/oozied.sh start
   SHELL
   
   # Initial run script, executed as the vagrant user. Needs to run after starting HDFS.
@@ -192,7 +189,15 @@ Vagrant.configure(2) do |config|
 	echo Loading HBase with hbase_preloaded_data scripts
 	cat /vagrant/hbase_preloaded_data/* | hbase-1.1.1/bin/hbase shell
 	echo Uploading Oozie sharelibs to HDFS
-	/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/oozie-setup.sh sharelib create -fs hdfs://bigdatavm:9000
+	/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/oozie-setup.sh sharelib create -fs hdfs://bigdatavm:9000 -locallib /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/oozie-sharelib-4.2.0.tar.gz
+	echo Preparing Oozie WAR file
+	/home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/bin/oozie-setup.sh prepare-war
+  SHELL
+  
+  # Run always
+  config.vm.provision "shell", privileged: false, run: "always", inline: <<-SHELL
+	echo Starting Oozie
+	oozie-4.2.0-distro/oozie-4.2.0/bin/oozied.sh start
   SHELL
   
   # Using vagrant-triggers plugin to stop YARN and HDFS on halt and reload commands
