@@ -167,6 +167,12 @@ Vagrant.configure(2) do |config|
 	echo Configuring Oozie
 	mkdir /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/libext
 	cp /home/vagrant/ext-2.2.zip /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/libext
+	echo Overwriting conf/hadoop-conf contents for Oozie
+    cat /vagrant/hadoop_conf/core-site.xml > /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/conf/hadoop-conf/core-site.xml
+	cat /vagrant/hadoop_conf/mapred-site.xml > /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/conf/hadoop-conf/mapred-site.xml
+	cat /vagrant/hadoop_conf/yarn-site.xml > /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/conf/hadoop-conf/yarn-site.xml
+	cat /vagrant/hadoop_conf/hdfs-site.xml > /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/conf/hadoop-conf/hdfs-site.xml
+	cat /vagrant/hadoop_conf/hadoop-env.sh > /home/vagrant/oozie-4.2.0-distro/oozie-4.2.0/conf/hadoop-conf/hadoop-env.sh
   SHELL
 
   # Run always
@@ -177,6 +183,8 @@ Vagrant.configure(2) do |config|
     hbase-1.1.1/bin/start-hbase.sh
 	echo Starting YARN
 	hadoop-2.7.1/sbin/start-yarn.sh
+	echo Starting MR historyserver
+	hadoop-2.7.1/sbin/mr-jobhistory-daemon.sh start historyserver
   SHELL
   
   # Initial run script, executed as the vagrant user. Needs to run after starting HDFS.
@@ -202,6 +210,8 @@ Vagrant.configure(2) do |config|
   
   # Using vagrant-triggers plugin to stop YARN and HDFS on halt and reload commands
   config.trigger.before :halt do
+	info Stopping MR historyserver
+	run "hadoop-2.7.1/sbin/mr-jobhistory-daemon.sh stop historyserver"
 	info "Stopping YARN"
 	run "vagrant ssh -c 'hadoop-2.7.1/sbin/stop-yarn.sh'"
 	info "Stopping HBase"
@@ -210,6 +220,8 @@ Vagrant.configure(2) do |config|
 	run "vagrant ssh -c 'hadoop-2.7.1/sbin/stop-dfs.sh'"
   end
   config.trigger.before :reload do
+	info Stopping MR historyserver
+	run "hadoop-2.7.1/sbin/mr-jobhistory-daemon.sh stop historyserver"
 	info "Stopping YARN"
 	run "vagrant ssh -c 'hadoop-2.7.1/sbin/stop-yarn.sh'"
 	info "Stopping HBase"

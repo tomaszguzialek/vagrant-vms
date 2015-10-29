@@ -13,10 +13,10 @@
     </property>
 	<property>
         <name>yarn.resourcemanager.bind-host</name>
-        <value>0.0.0.0</value>
+        <value>bigdatavm</value>
     </property>
 	<property>
         <name>yarn.nodemanager.bind-host</name>
-        <value>0.0.0.0</value>
+        <value>bigdatavm</value>
     </property>
 </configuration>
