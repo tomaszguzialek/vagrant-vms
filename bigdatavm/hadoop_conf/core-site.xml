@@ -1,6 +1,16 @@
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://localhost:9000</value>
+        <value>hdfs://bigdatavm:9000</value>
+    </property>
+	
+	<!-- OOZIE -->
+	<property>
+        <name>hadoop.proxyuser.vagrant.hosts</name>
+        <value>bigdatavm</value>
+    </property>
+    <property>
+        <name>hadoop.proxyuser.vagrant.groups</name>
+        <value>vagrant</value>
     </property>
 </configuration>
