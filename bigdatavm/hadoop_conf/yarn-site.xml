@@ -1,22 +1,22 @@
 <configuration>
-    <property>
-        <name>yarn.nodemanager.aux-services</name>
-        <value>mapreduce_shuffle</value>
-    </property>
 	<property>
-        <name>yarn.resourcemanager.hostname</name>
-        <value>bigdatavm</value>
-    </property>
+		<name>yarn.nodemanager.aux-services</name>
+		<value>mapreduce_shuffle</value>
+	</property>
 	<property>
-        <name>yarn.nodemanager.hostname</name>
-        <value>bigdatavm</value>
-    </property>
+		<name>yarn.resourcemanager.hostname</name>
+		<value>bigdatavm</value>
+	</property>
 	<property>
-        <name>yarn.resourcemanager.bind-host</name>
-        <value>bigdatavm</value>
-    </property>
+		<name>yarn.nodemanager.hostname</name>
+		<value>bigdatavm</value>
+	</property>
 	<property>
-        <name>yarn.nodemanager.bind-host</name>
-        <value>bigdatavm</value>
-    </property>
+		<name>yarn.resourcemanager.bind-host</name>
+		<value>bigdatavm</value>
+	</property>
+	<property>
+		<name>yarn.nodemanager.bind-host</name>
+		<value>bigdatavm</value>
+	</property>
 </configuration>
