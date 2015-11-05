@@ -1,22 +1,26 @@
 <configuration>
-    <property>
-        <name>dfs.namenode.rpc-bind-host</name>
-        <value>0.0.0.0</value>
-    </property>
 	<property>
-        <name>dfs.namenode.name.dir</name>
-        <value>/home/vagrant/dfs/name</value>
-    </property>
+		<name>dfs.namenode.rpc-bind-host</name>
+		<value>bigdatavm</value>
+	</property>
 	<property>
-        <name>dfs.datanode.data.dir</name>
-        <value>/home/vagrant/dfs/data</value>
-    </property>
+		<name>dfs.datanode.address</name>
+		<value>bigdatavm:50010</value>
+	</property>
 	<property>
-        <name>dfs.replication</name>
-        <value>1</value>
-    </property>
+		<name>dfs.namenode.name.dir</name>
+		<value>/home/vagrant/dfs/name</value>
+	</property>
 	<property>
-        <name>dfs.permissions.enabled</name>
-        <value>false</value>
-    </property>
+		<name>dfs.datanode.data.dir</name>
+		<value>/home/vagrant/dfs/data</value>
+	</property>
+	<property>
+		<name>dfs.replication</name>
+		<value>1</value>
+	</property>
+	<property>
+		<name>dfs.permissions.enabled</name>
+		<value>false</value>
+	</property>
 </configuration>
