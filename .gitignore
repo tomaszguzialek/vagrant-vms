@@ -3,3 +3,7 @@
 download_cache
 *.tar.gz
 *.tgz
+.project
+.settings
+.classpath
+bigdatavm/datacleaner/lib
